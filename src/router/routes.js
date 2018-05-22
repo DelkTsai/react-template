@@ -8,16 +8,26 @@ import Loadable from "../components/common/Loadable/Loadable";
 
 const routes = [
   {
-    path: "/test",
+    path: "/",
     component: Loadable({
       loader: () =>
-        import(/* webpackChunkName: "route-test-echarts" */ "../components/demo/TestInject"),
+        import(/* webpackChunkName: "route-search" */ "../components/Search/Search"),
+    }),
+  },
+  {
+    path: "/book/chapters",
+    component: Loadable({
+      loader: () =>
+        import(/* webpackChunkName: "route-chapter" */ "../components/Chapter/Chapter"),
+    }),
+  },
+  {
+    path: "/book/chapters/detail",
+    component: Loadable({
+      loader: () =>
+        import(/* webpackChunkName: "route-content" */ "../components/Content/Content"),
     }),
   },
 ];
 
-const breadcrumbNameMap = {
-  "/route": "label",
-};
-
-export { routes, breadcrumbNameMap };
+export { routes };

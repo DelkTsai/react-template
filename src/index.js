@@ -10,26 +10,12 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Provider } from "mobx-react";
 import { hotRehydrate, rehydrate } from "rfx-core";
 import moment from "moment";
-import { LocaleProvider } from "antd";
-import zhCN from "antd/lib/locale-provider/zh_CN";
+import PropTypes from "prop-types";
 import "normalize.css";
 import { isProduction } from "./utils/constants";
 import "./stores/stores";
 import "./styles/main.less";
-import Loadable from "./components/common/Loadable/Loadable";
-
-/**
- * 代码拆分和按需加载
- */
-const LoadableApp = Loadable({
-  loader: () =>
-    import(/* webpackChunkName: "route-app" */ "./components/App/App"),
-});
-
-const LoadableLogin = Loadable({
-  loader: () =>
-    import(/* webpackChunkName: "route-app" */ "./components/common/Login/Login"),
-});
+import { routes } from "./router/routes";
 
 /**
  * moment时区设置为中国
@@ -38,16 +24,20 @@ moment.locale("zh-cn");
 
 const store = rehydrate();
 
+const renderRoute = ({ path, component }) => (
+  <Route key={path} path={path} component={component} exact />
+);
+
+renderRoute.propTypes = {
+  path: PropTypes.string,
+  component: PropTypes.element,
+};
+
 const renderApp = () => {
   render(
     <Provider store={isProduction ? store : hotRehydrate()}>
       <Router>
-        <LocaleProvider locale={zhCN}>
-          <Switch>
-            <Route path="/" component={LoadableApp} exact />
-            <Route path="/login" component={LoadableLogin} exact />
-          </Switch>
-        </LocaleProvider>
+        <Switch>{routes.map(renderRoute)}</Switch>
       </Router>
     </Provider>,
     document.getElementById("root")

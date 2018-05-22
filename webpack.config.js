@@ -21,8 +21,12 @@ module.exports = {
     historyApiFallback: true,
     disableHostCheck: true,
     proxy: {
-      "/inapi": {
-        target: `http://${proxy}:20111`,
+      "/novel": {
+        target: `http://juhe.im`,
+        changeOrigin: true,
+      },
+      "/chapter": {
+        target: `http://chapterup.zhuishushenqi.com`,
         changeOrigin: true,
       },
     },
@@ -51,6 +55,12 @@ module.exports = {
           },
           {
             loader: "css-loader",
+          },
+          {
+            loader: "px2rem-loader",
+            options: {
+              remUnit: config.webpack.remUnit,
+            },
           },
           {
             loader: "less-loader",

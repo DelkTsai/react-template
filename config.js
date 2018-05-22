@@ -48,6 +48,7 @@ module.exports = {
       },
     },
     publicPath: "/",
+    remUnit: 37.5,
   },
   path: {
     entry,

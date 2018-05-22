@@ -5,7 +5,7 @@
  * */
 
 import axios from "axios";
-import { notification } from "antd";
+import { Toast } from "antd-mobile";
 
 axios.defaults.retry = 3;
 axios.defaults.retryDelay = 1000;
@@ -88,34 +88,33 @@ const request = (config, success, error) =>
         return Promise.reject(newError);
       }
       if (success && success.message) {
-        notification.success({ message: success.message });
+        Toast.success(success.message, 1);
       }
       return Promise.resolve(response);
     },
     ({ response }) => {
-      const newConfig = {};
+      let message = error && error.message ? error.message : "";
       switch (response.status) {
         case 403: {
-          newConfig.description = "您没有权限这样做";
+          message = "您没有权限这样做";
           break;
         }
         case 503: {
-          newConfig.description = "服务器当前无法处理请求";
+          message = "服务器当前无法处理请求";
           break;
         }
         case 502: {
-          newConfig.description = "服务器接暂无响应";
+          message = "服务器接暂无响应";
           break;
         }
         default: {
           if (response && response.data && response.data.errMsg) {
-            newConfig.description = response.data.errMsg;
+            message = response.data.errMsg;
           }
         }
       }
       if (error && error.message) {
-        newConfig.message = error.message;
-        notification.error(newConfig);
+        Toast.fail(message, 1);
       }
       return Promise.reject(response);
     }
