@@ -1,7 +1,14 @@
 import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
-import { SearchBar, WhiteSpace, WingBlank, List } from "antd-mobile";
+import {
+  SearchBar,
+  WhiteSpace,
+  WingBlank,
+  List,
+  ActivityIndicator,
+} from "antd-mobile";
 import PropTypes from "prop-types";
+import qs from "query-string";
 import "./search.less";
 
 const Item = List.Item;
@@ -15,6 +22,10 @@ export default class Search extends Component {
     history: PropTypes.object.isRequired,
   };
 
+  state = {
+    animating: false,
+  };
+
   componentDidMount() {
     this.autoFocusInst.focus();
   }
@@ -24,22 +35,20 @@ export default class Search extends Component {
   };
 
   search = keyword => {
-    this.props.store.bookState.search(keyword);
+    this.props.store.bookState.setSearchList();
+    this.setState({ animating: true });
+    this.props.store.bookState
+      .search(keyword)
+      .then(
+        () => this.setState({ animating: false }),
+        () => this.setState({ animating: false })
+      );
   };
 
-  handleClick = bookid => {
-    this.props.store.bookState
-      .getBookSources({
-        view: "summary",
-        book: bookid,
-      })
-      .then(bookSources =>
-        this.props.history.push(
-          `/book/chapters?bookSourceId=${
-            bookSources.length > 0 ? bookSources[0]._id : ""
-          }`
-        )
-      );
+  handleClick = (bookId, title) => {
+    this.props.history.push(
+      `/book/chapters?${qs.stringify({ bookId, title })}`
+    );
   };
 
   renderListItem = () => {
@@ -51,7 +60,7 @@ export default class Search extends Component {
         key={_id}
         arrow="horizontal"
         multipleLine
-        onClick={() => this.handleClick(_id)}
+        onClick={() => this.handleClick(_id, title)}
         className="search-list-item"
       >
         {title}
@@ -63,6 +72,7 @@ export default class Search extends Component {
   };
 
   render() {
+    const { animating } = this.state;
     return (
       <div id="search">
         <div className="search-message">Navi</div>
@@ -80,6 +90,7 @@ export default class Search extends Component {
         </div>
         <div className="search-result">
           <WingBlank>
+            <ActivityIndicator text="正在努力搜索中..." animating={animating} />
             <List>{this.renderListItem()}</List>
           </WingBlank>
         </div>

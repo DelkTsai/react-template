@@ -29,18 +29,31 @@ export default class Chapter extends Component {
       dataSource,
       isLoading: true,
     };
+    this.title = "navi";
   }
 
   componentDidMount() {
-    const { bookSourceId } = qs.parse(window.location.search);
+    const { bookId, title } = qs.parse(window.location.search);
+    this.title = title;
     this.props.store.bookState
-      .getBookChapters(bookSourceId)
-      .then(({ chapters = [] }) =>
-        this.setState({
-          dataSource: this.state.dataSource.cloneWithRows(chapters),
-          isLoading: false,
-        })
-      );
+      .getBookSources({
+        view: "summary",
+        book: bookId,
+      })
+      .then(bookSources => {
+        if (bookSources.length === 0) {
+          return;
+        }
+        const bookSourceId = bookSources[0]._id;
+        this.props.store.bookState
+          .getBookChapters(bookSourceId)
+          .then(({ chapters = [] }) =>
+            this.setState({
+              dataSource: this.state.dataSource.cloneWithRows(chapters),
+              isLoading: false,
+            })
+          );
+      });
   }
 
   componentWillUnmount() {}
@@ -51,7 +64,7 @@ export default class Chapter extends Component {
 
   render() {
     const {
-      bookChapters: { name },
+      bookChapters: { name = "navi" },
     } = this.props.store.bookState;
     const { dataSource } = this.state;
     const separator = (sectionID, rowID) => (
@@ -88,7 +101,11 @@ export default class Chapter extends Component {
         <WingBlank>
           <ListView
             dataSource={dataSource}
-            renderHeader={() => <span>来源：{name}</span>}
+            renderHeader={() => (
+              <span>
+                {this.title} --来源：{name}
+              </span>
+            )}
             renderFooter={() => (
               <div style={{ padding: 30, textAlign: "center" }}>
                 {this.state.isLoading ? "Loading..." : "Loaded"}
