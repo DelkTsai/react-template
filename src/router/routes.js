@@ -11,21 +11,7 @@ const routes = [
     path: "/",
     component: Loadable({
       loader: () =>
-        import(/* webpackChunkName: "route-search" */ "../components/Search/Search"),
-    }),
-  },
-  {
-    path: "/book/chapters",
-    component: Loadable({
-      loader: () =>
-        import(/* webpackChunkName: "route-chapter" */ "../components/Chapter/Chapter"),
-    }),
-  },
-  {
-    path: "/book/chapters/detail",
-    component: Loadable({
-      loader: () =>
-        import(/* webpackChunkName: "route-content" */ "../components/Content/Content"),
+        import(/* webpackChunkName: "route-search" */ "../components/App/App"),
     }),
   },
 ];
