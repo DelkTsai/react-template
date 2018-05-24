@@ -9,6 +9,7 @@ import {
 } from "antd-mobile";
 import PropTypes from "prop-types";
 import qs from "query-string";
+import Particles from "particlesjs";
 import "./search.less";
 
 const Item = List.Item;
@@ -27,6 +28,13 @@ export default class Search extends Component {
   };
 
   componentDidMount() {
+    Particles.init({
+      selector: ".particles-background",
+      connectParticles: true,
+      color: "#ecf0f1",
+      speed: 0.5,
+      maxParticles: 55,
+    });
     this.autoFocusInst.focus();
   }
 
@@ -64,8 +72,14 @@ export default class Search extends Component {
         className="search-list-item"
       >
         {title}
-        <Brief>
-          作者：{author} 分类：{cat}
+        <Brief
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>作者：{author}</div>
+          <div>分类：{cat}</div>
         </Brief>
       </Item>
     ));
@@ -75,24 +89,31 @@ export default class Search extends Component {
     const { animating } = this.state;
     return (
       <div id="search">
-        <div className="search-message">Navi</div>
-        <div className="search-input">
-          <WingBlank>
-            <SearchBar
-              onCancel={this.search}
-              cancelText="搜索"
-              ref={this.initSearchInputref}
-              placeholder="Search"
-              maxLength={8}
-            />
-          </WingBlank>
+        <canvas className="particles-background" />
+        <div className="search-container">
+          <div className="search-input">
+            <WingBlank size="lg">
+              <SearchBar
+                onCancel={this.search}
+                cancelText="搜索"
+                ref={this.initSearchInputref}
+                placeholder="Search"
+                maxLength={8}
+              />
+            </WingBlank>
+          </div>
           <WhiteSpace />
-        </div>
-        <div className="search-result">
-          <WingBlank>
-            <ActivityIndicator text="正在努力搜索中..." animating={animating} />
-            <List>{this.renderListItem()}</List>
-          </WingBlank>
+          <div className="search-message">找到你想看的小说</div>
+          <WhiteSpace />
+          <div className="search-result">
+            <WingBlank size="lg">
+              <ActivityIndicator
+                text="正在努力搜索中..."
+                animating={animating}
+              />
+              <List>{this.renderListItem()}</List>
+            </WingBlank>
+          </div>
         </div>
       </div>
     );

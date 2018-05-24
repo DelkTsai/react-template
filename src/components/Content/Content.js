@@ -9,6 +9,7 @@ import { inject, observer } from "mobx-react";
 import qs from "query-string";
 import PropTypes from "prop-types";
 import { Card, ActivityIndicator } from "antd-mobile";
+import "./content.less";
 
 @inject("store")
 @observer
@@ -46,7 +47,9 @@ export default class Content extends Component {
           <Card.Header title={title} />
           <Card.Body>
             <ActivityIndicator text="正在加载中..." animating={animating} />
-            <div style={{ whiteSpace: "pre-line" }}>{cpContent}</div>
+            <div style={{ whiteSpace: "pre-line", color: "#ECF0F1" }}>
+              {cpContent}
+            </div>
           </Card.Body>
           <Card.Footer content="上一章" extra={<div>下一章</div>} />
         </Card>

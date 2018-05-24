@@ -71,25 +71,22 @@ export default class Chapter extends Component {
       <div
         key={`${sectionID}-${rowID}`}
         style={{
-          backgroundColor: "#F5F5F9",
-          height: 8,
-          borderTop: "1px solid #ECECED",
-          borderBottom: "1px solid #ECECED",
+          height: 0,
         }}
       />
     );
     const row = (rowData, sectionID, rowID) => (
       <div
         key={rowID}
-        style={{ padding: "0 15px", width: 330 }}
+        style={{ padding: "0 15px", width: 315 }}
         onClick={() => this.handleClick(rowData.link)}
       >
         <div
           style={{
             lineHeight: "50px",
             color: "#888",
-            fontSize: 18,
-            borderBottom: "1px solid #F6F6F6",
+            fontSize: 14,
+            borderBottom: "1px solid #ECF0F1",
           }}
         >
           {rowData.title}
@@ -98,23 +95,24 @@ export default class Chapter extends Component {
     );
     return (
       <div id="chapter">
-        <WingBlank>
+        <WingBlank size="lg">
           <ListView
             dataSource={dataSource}
+            initialListSize={20}
             renderHeader={() => (
-              <span>
+              <span className="chapter-message">
                 {this.title} --来源：{name}
               </span>
             )}
             renderFooter={() => (
               <div style={{ padding: 30, textAlign: "center" }}>
-                {this.state.isLoading ? "Loading..." : "Loaded"}
+                {this.state.isLoading ? "加载中..." : "加载完成"}
               </div>
             )}
             renderRow={row}
             renderSeparator={separator}
             className="am-list"
-            pageSize={4}
+            pageSize={5}
             useBodyScroll
             scrollRenderAheadDistance={500}
           />
