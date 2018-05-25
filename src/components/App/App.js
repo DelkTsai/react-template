@@ -84,7 +84,6 @@ export default class App extends Component {
               />
             }
             selected={this.state.selectedTab === "blueTab"}
-            badge={1}
             onPress={() => {
               this.setState({
                 selectedTab: "blueTab",
@@ -117,7 +116,6 @@ export default class App extends Component {
             }
             title="Koubei"
             key="Koubei"
-            badge="new"
             selected={this.state.selectedTab === "redTab"}
             onPress={() => {
               this.setState({
@@ -151,7 +149,6 @@ export default class App extends Component {
             }
             title="Friend"
             key="Friend"
-            dot
             selected={this.state.selectedTab === "greenTab"}
             onPress={() => {
               this.setState({
