@@ -5,12 +5,14 @@
  * */
 
 const webpack = require("webpack");
+const HappyPack = require("happypack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const config = require("./config");
 
 const proxy = process.env.DEV_PROXY || "192.168.32.101";
 
 module.exports = {
+  mode: "development",
   entry: ["babel-polyfill", config.path.entry],
   devServer: {
     hot: true,
@@ -36,7 +38,7 @@ module.exports = {
     publicPath: config.webpack.publicPath,
     filename: "app.[hash].js",
   },
-  devtool: "eval-source-map",
+  devtool: "eval",
   resolve: {
     modules: [config.path.nodeModulesPath],
   },
@@ -45,7 +47,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
+        use: "happypack/loader?id=babel",
       },
       {
         test: /\.less|css$/,
@@ -71,24 +73,6 @@ module.exports = {
         ],
       },
       {
-        test: /\.(jpe?g|png|gif|svg)$/i,
-        use: [
-          "file-loader?hash=sha512&digest=hex&name=[hash].[ext]",
-          {
-            loader: "image-webpack-loader",
-            options: {
-              progressive: true,
-              optimizationLevel: 7,
-              interlaced: false,
-              pngquant: {
-                quality: "65-90",
-                speed: 4,
-              },
-            },
-          },
-        ],
-      },
-      {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: "url-loader?limit=10000&mimetype=application/font-woff",
       },
@@ -99,15 +83,14 @@ module.exports = {
     ],
   },
   plugins: [
-    // 配置的全局常量
-    new webpack.DefinePlugin({
-      "process.env": {
-        NODE_ENV: JSON.stringify(config.webpack.dev.env.NODE_ENV),
-      },
+    // 多进程
+    new HappyPack({
+      id: "babel",
+      loaders: ["babel-loader"],
     }),
-    // 显示模块的相对路径
-    new webpack.NamedModulesPlugin(),
+    // 热更新
     new webpack.HotModuleReplacementPlugin(),
+    // html模板
     new HtmlWebpackPlugin({ hash: false, template: config.path.indexHtml }),
   ],
 };

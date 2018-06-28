@@ -5,66 +5,53 @@
  * */
 
 const webpack = require("webpack");
+const HappyPack = require("happypack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const InlineManifestWebpackPlugin = require("inline-manifest-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 // const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const MomentLocalesPlugin = require("moment-locales-webpack-plugin");
 
-const extractCSS = new ExtractTextPlugin({
-  filename: "stylesheets/[name].[contenthash]-css.css",
-  allChunks: true,
-});
-const extractLESS = new ExtractTextPlugin({
-  filename: "stylesheets/[name].[contenthash]-less.css",
-  allChunks: true,
-});
 const config = require("./config");
 
 module.exports = {
+  mode: "production",
   resolve: {
     modules: [config.path.nodeModulesPath],
   },
   entry: {
-    vendor: config.webpack.build.vendor,
     app: ["babel-polyfill", config.path.entry],
   },
   output: {
     path: config.path.distPath,
     publicPath: config.webpack.publicPath,
     filename: "assets/[name].[chunkhash].js",
-    chunkFilename: "assets/[name].[chunkhash].child.js",
+    chunkFilename: "assets/[name].[chunkhash].chunk.js",
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         include: config.path.srcPath,
-        loader: "babel-loader",
+        use: "happypack/loader?id=babel",
       },
       {
         test: /\.css$/,
-        use: extractCSS.extract([
-          {
-            loader: "css-loader",
-            options: { minimize: true },
+        use: [MiniCssExtractPlugin.loader, "css-loader",          {
+          loader: "px2rem-loader",
+          options: {
+            remUnit: config.webpack.remUnit,
           },
-          {
-            loader: "px2rem-loader",
-            options: {
-              remUnit: config.webpack.remUnit,
-            },
-          },
-          "postcss-loader",
-        ]),
+        }, "postcss-loader"],
       },
       {
         test: /\.less$/i,
-        use: extractLESS.extract([
-          {
-            loader: "css-loader",
-            options: { minimize: true },
-          },
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
           {
             loader: "px2rem-loader",
             options: {
@@ -79,24 +66,6 @@ module.exports = {
               modifyVars: config.modifyVars,
             },
           },
-        ]),
-      },
-      {
-        test: /\.(jpe?g|png|gif|svg)$/i,
-        use: [
-          "file-loader?hash=sha512&digest=hex&name=[hash].[ext]",
-          {
-            loader: "image-webpack-loader",
-            options: {
-              progressive: true,
-              optimizationLevel: 7,
-              interlaced: false,
-              pngquant: {
-                quality: "65-90",
-                speed: 4,
-              },
-            },
-          },
         ],
       },
       {
@@ -109,66 +78,90 @@ module.exports = {
       },
     ],
   },
+  optimization: {
+    minimizer: [
+      // 自定义js优化配置，将会覆盖默认配置
+      new UglifyJsPlugin({
+        // 过滤掉以".min.js"结尾的文件，我们认为这个后缀本身就是已经压缩好的代码，没必要进行二次压缩
+        exclude: /\.min\.js$/,
+        cache: true,
+        // 开启并行压缩，充分利用cpu
+        parallel: true,
+        sourceMap: false,
+        // 移除注释
+        extractComments: false,
+        uglifyOptions: {
+          compress: {
+            unused: true,
+            warnings: false,
+            drop_console: true,
+          },
+          output: {
+            comments: false,
+          },
+        },
+      }),
+      // 用于优化css文件
+      new OptimizeCSSAssetsPlugin({
+        assetNameRegExp: /\.css$/g,
+        cssProcessorOptions: {
+          safe: true,
+          autoprefixer: { disable: true },
+          mergeLonghand: false,
+          discardComments: {
+            // 移除注释
+            removeAll: true,
+          },
+        },
+        canPrint: true,
+      }),
+    ],
+    runtimeChunk: "single",
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendor",
+          minSize: 30000,
+          minChunks: 1,
+          chunks: "initial",
+          // 设置处理的优先级，数值越大越优先处理
+          priority: 1,
+        },
+        commons: {
+          name: "commons",
+          minSize: 30000,
+          minChunks: 3,
+          chunks: "initial",
+          priority: -1,
+          // 允许我们使用已经存在的代码块
+          reuseExistingChunk: true,
+        },
+      },
+    },
+  },
   plugins: [
+    // 多进程
+    new HappyPack({
+      id: "babel",
+      loaders: ["babel-loader"],
+    }),
     // 分析打包的结构
     // new BundleAnalyzerPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "stylesheets/[name].css",
+      chunkFilename: "stylesheets/[id].css",
+    }),
     // 使得哈希基于模块的相对路径, 生成一个四个字符的字符串作为模块ID
     new webpack.HashedModuleIdsPlugin(),
-    // 配置的全局常量
-    new webpack.DefinePlugin({
-      "process.env": {
-        NODE_ENV: JSON.stringify(config.webpack.build.env.NODE_ENV),
-      },
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ["vendor", "runtime"],
-      // 没有应用程序模块将包含在这个块中
-      minChunks: Infinity,
-    }),
-    // 多入口
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   // ( 公共chunk(commnons chunk)的名称)
-    //   name: 'commons',
-    //   // ( 公共chunk的文件名)
-    //   filename: 'assets/commons.[chunkhash].js',
-    //   // (模块必须被3个入口chunk共享)
-    //   minChunks: 3,
-    // }),
-    new webpack.optimize.CommonsChunkPlugin({
-      // (选择所有被选chunks的子chunks)
-      children: true,
-      // (异步加载)
-      async: true,
-      // (在提取之前需要至少三个子chunk共享这个模块)
-      minChunks: 3,
-    }),
-    // 压缩代码
-    new webpack.optimize.UglifyJsPlugin({
-      // 最紧凑的输出
-      beautify: false,
-      // 删除所有的注释
-      comments: false,
-      compress: {
-        // 在UglifyJs删除没有用到的代码时不输出警告
-        warnings: false,
-        // 删除所有的 `console` 语句
-        // 还可以兼容ie浏览器
-        drop_console: true,
-        // 内嵌定义了但是只用到一次的变量
-        collapse_vars: true,
-        // 提取出出现多次但是没有定义成变量去引用的静态值
-        reduce_vars: true,
-      },
-    }),
-    extractCSS,
-    extractLESS,
+    // html模板
     new HtmlWebpackPlugin({
-      hash: false,
+      filename: "index.html",
       template: config.path.indexHtml,
     }),
+    new InlineManifestWebpackPlugin("runtime"),
+    // 拷贝静态资源
     new CopyWebpackPlugin(config.webpack.build.plugins.CopyWebpackPlugin),
-    // 作用域提升
-    new webpack.optimize.ModuleConcatenationPlugin(),
     // 去除moment中除“zh-cn”之外的所有语言环境, “en”内置于Moment中，不能删除
     new MomentLocalesPlugin({
       localesToKeep: ["zh-cn"],
