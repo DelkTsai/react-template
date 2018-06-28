@@ -40,12 +40,17 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader",          {
-          loader: "px2rem-loader",
-          options: {
-            remUnit: config.webpack.remUnit,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: "px2rem-loader",
+            options: {
+              remUnit: config.webpack.remUnit,
+            },
           },
-        }, "postcss-loader"],
+          "postcss-loader",
+        ],
       },
       {
         test: /\.less$/i,
