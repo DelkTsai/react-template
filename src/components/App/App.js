@@ -160,12 +160,10 @@ export default class App extends Component {
           </TabBar.Item>
           <TabBar.Item
             icon={{
-              uri:
-                "https://zos.alipayobjects.com/rmsportal/asJMfBrNqpMMlVpeInPQ.svg",
+              uri: "https://zos.alipayobjects.com/rmsportal/asJMfBrNqpMMlVpeInPQ.svg",
             }}
             selectedIcon={{
-              uri:
-                "https://zos.alipayobjects.com/rmsportal/gjpzzcrPMkhfEqgbYvmN.svg",
+              uri: "https://zos.alipayobjects.com/rmsportal/gjpzzcrPMkhfEqgbYvmN.svg",
             }}
             title="My"
             key="my"

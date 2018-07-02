@@ -10,8 +10,7 @@ const routes = [
   {
     path: "/",
     component: Loadable({
-      loader: () =>
-        import(/* webpackChunkName: "route-search" */ "../components/App/App"),
+      loader: () => import(/* webpackChunkName: "route-search" */ "../components/App/App"),
     }),
   },
 ];
