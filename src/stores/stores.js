@@ -6,8 +6,8 @@
 
 import { store } from "rfx-core";
 
-import BookState from "./BookState";
+import DemoState from "./DemoState";
 
 export default store.setup({
-  bookState: BookState,
+  demoState: DemoState,
 });

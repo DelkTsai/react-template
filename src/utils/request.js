@@ -5,7 +5,7 @@
  * */
 
 import axios from "axios";
-import { notification } from "antd";
+import { Toast } from "antd-mobile";
 
 axios.defaults.retry = 0;
 axios.defaults.retryDelay = 1000;
@@ -87,14 +87,7 @@ const checkStatus = response => {
   }
   // TODO 处理后台返回的错误信息
   const errortext = codeMessage[response.status] || response.statusText;
-  notification.error({
-    message: `请求错误 ${response.status}: ${response.config.url}`,
-    description: errortext,
-    style: {
-      width: 484,
-      marginLeft: 384 - 484,
-    },
-  });
+  Toast.fail(errortext);
 };
 
 /**
@@ -110,13 +103,13 @@ const request = ({ config, success, error }) =>
   axios(config).then(
     response => {
       if (success) {
-        notification.success(success);
+        Toast.success(success);
       }
       return Promise.resolve(response);
     },
     ({ response }) => {
       if (error) {
-        notification.error(error);
+        Toast.fail(error);
       } else {
         checkStatus(response);
       }
