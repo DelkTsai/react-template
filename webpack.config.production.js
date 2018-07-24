@@ -43,13 +43,13 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           "css-loader",
+          "postcss-loader",
           {
             loader: "px2rem-loader",
             options: {
               remUnit: config.webpack.remUnit,
             },
           },
-          "postcss-loader",
         ],
       },
       {
@@ -57,13 +57,13 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           "css-loader",
+          "postcss-loader",
           {
             loader: "px2rem-loader",
             options: {
               remUnit: config.webpack.remUnit,
             },
           },
-          "postcss-loader",
           {
             loader: "less-loader",
             options: {
