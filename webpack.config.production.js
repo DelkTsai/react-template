@@ -39,21 +39,26 @@ module.exports = {
         use: "happypack/loader?id=babel",
       },
       {
-        test: /\.css$/,
+        test: /\.less|css$/,
+        include: /node_modules/,
         use: [
           MiniCssExtractPlugin.loader,
           "css-loader",
           "postcss-loader",
           {
-            loader: "px2rem-loader",
+            loader: "less-loader",
             options: {
-              remUnit: config.webpack.remUnit,
+              // less@3
+              javascriptEnabled: true,
+              // 覆盖antd样式的全局变量
+              modifyVars: config.modifyVars,
             },
           },
         ],
       },
       {
-        test: /\.less$/i,
+        test: /\.less|css$/,
+        exclude: /node_modules/,
         use: [
           MiniCssExtractPlugin.loader,
           "css-loader",
@@ -67,6 +72,8 @@ module.exports = {
           {
             loader: "less-loader",
             options: {
+              // less@3
+              javascriptEnabled: true,
               // 覆盖antd样式的全局变量
               modifyVars: config.modifyVars,
             },
@@ -74,11 +81,29 @@ module.exports = {
         ],
       },
       {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        use: [
+          "file-loader?hash=sha512&digest=hex&name=[hash].[ext]",
+          // {
+          //   loader: "image-webpack-loader",
+          //   options: {
+          //     progressive: true,
+          //     optimizationLevel: 7,
+          //     interlaced: false,
+          //     pngquant: {
+          //       quality: "65-90",
+          //       speed: 4,
+          //     },
+          //   },
+          // },
+        ],
+      },
+      {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: "url-loader?limit=10000&mimetype=application/font-woff",
       },
       {
-        test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        test: /\.(ttf|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: "file-loader",
       },
     ],
@@ -90,7 +115,7 @@ module.exports = {
         // 过滤掉以".min.js"结尾的文件，我们认为这个后缀本身就是已经压缩好的代码，没必要进行二次压缩
         exclude: /\.min\.js$/,
         cache: true,
-        // 开启并行压缩，充分利用cpu
+        // 多进程并行运行来提高构建速度
         parallel: true,
         sourceMap: false,
         // 移除注释
@@ -110,7 +135,7 @@ module.exports = {
       new OptimizeCSSAssetsPlugin({
         assetNameRegExp: /\.css$/g,
         cssProcessorOptions: {
-          safe: true,
+          // safe: true,
           autoprefixer: { disable: true },
           mergeLonghand: false,
           discardComments: {
